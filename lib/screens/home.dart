@@ -290,6 +290,7 @@ class _HomeState extends State<Home> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Spacer(),
+
                 Container(
                   child: Text(
                     product[index].name!,
@@ -299,6 +300,7 @@ class _HomeState extends State<Home> {
                   ),
                   width: DeviceInfo(context).getWidth() * 0.5,
                 ),
+
                 SizedBox(
                   height: 5,
                 ),
@@ -338,6 +340,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+
   Widget categoryWiseProductShimmer() {
     return Column(
       children: [
@@ -358,13 +361,16 @@ class _HomeState extends State<Home> {
     );
   }
 
+
   Container categoryWiseProduct() {
     return MyWidget.customContainer(
+
         alignment: Alignment.topLeft,
         width: double.infinity,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
+
           children: [
             Container(
               height: 17,
@@ -381,6 +387,7 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 12,
             ),
+
             _faceCategoryWiseProducts
                 ? product.length == 0
                     ? Container(
@@ -481,12 +488,15 @@ class _HomeState extends State<Home> {
   }
 
   Widget chartShimmer() {
+
     return Container(
       height: 130,
       width: DeviceInfo(context).getWidth() / 1.5,
       child:
           ShimmerHelper().buildListShimmer(item_height: 20.0, item_count: 10),
     );
+
+
   }
 
   Widget chartContainer() {

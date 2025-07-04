@@ -91,7 +91,7 @@ class FeaturesList {
               child: Column(
                 children: [
                   Image.asset(
-                    'assets/icon/refund.png',
+                    'assets/icon/naira.png',
                     width: 16,
                     height: 16,
                     color: MyTheme.white,
@@ -108,7 +108,8 @@ class FeaturesList {
                   ),
                 ],
               ),
-            )),
+            ),
+        ),
       ),
     );
     /*featureList.add(InkWell(

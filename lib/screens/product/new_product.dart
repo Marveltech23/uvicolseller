@@ -2107,6 +2107,8 @@ class _NewProductState extends State<NewProduct> {
         isMandatory: isMandatory);
   }
 
+
+
   Widget _buildMultiCategory(String title,
       {bool isMandatory = false, double? width}) {
     return buildCommonSingleField(
@@ -2133,38 +2135,278 @@ class _NewProductState extends State<NewProduct> {
             )),
         isMandatory: isMandatory);
   }
+// dropdown product line 2136
+//   Widget _buildDropDown(dynamic onchange, CommonDropDownItem? selectedValue,
+//       List<CommonDropDownItem> itemList,
+//       {double? width}) {
+//     return Container(
+//       height: 46,
+//       width: width ?? mWidht,
+//       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+//       decoration: MDecoration.decoration1(),
+//       child: DropdownButton<CommonDropDownItem>(
+//         menuMaxHeight: 300,
+//         isDense: true,
+//         underline: Container(),
+//         isExpanded: true,
+//         onChanged: (CommonDropDownItem? value) {
+//           onchange(value);
+//         },
+//         icon: const Icon(Icons.arrow_drop_down),
+//         value: selectedValue,
+//         items: itemList
+//             .map(
+//               (value) => DropdownMenuItem<CommonDropDownItem>(
+//                 value: value,
+//                 child: Text(
+//                   value.value!,
+//                 ),
+//               ),
+//             )
+//             .toList(),
+//       ),
+//     );
+//   }
+  /// Line 2169
 
-  Widget _buildDropDown(dynamic onchange, CommonDropDownItem? selectedValue,
-      List<CommonDropDownItem> itemList,
-      {double? width}) {
-    return Container(
-      height: 46,
-      width: width ?? mWidht,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: MDecoration.decoration1(),
-      child: DropdownButton<CommonDropDownItem>(
-        menuMaxHeight: 300,
-        isDense: true,
-        underline: Container(),
-        isExpanded: true,
-        onChanged: (CommonDropDownItem? value) {
-          onchange(value);
-        },
-        icon: const Icon(Icons.arrow_drop_down),
-        value: selectedValue,
-        items: itemList
-            .map(
-              (value) => DropdownMenuItem<CommonDropDownItem>(
-                value: value,
-                child: Text(
-                  value.value!,
+  Widget _buildDropDown(
+      dynamic onchange,
+      CommonDropDownItem? selectedValue,
+      List<CommonDropDownItem> itemList, {
+        double? width,
+        String? hintText,
+      }) {
+    final TextEditingController searchController = TextEditingController();
+    final LayerLink layerLink = LayerLink();
+    final GlobalKey containerKey = GlobalKey();
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool isDropdownOpen = false;
+        OverlayEntry? overlayEntry;
+        List<CommonDropDownItem> filteredList = List.from(itemList);
+
+        void filterItems(String query) {
+          final lowerQuery = query.toLowerCase();
+
+          final matchingItems = itemList
+              .where((item) =>
+          item.value != null &&
+              item.value!.toLowerCase().contains(lowerQuery))
+              .toList();
+
+          final nonMatchingItems = itemList
+              .where((item) =>
+          item.value != null &&
+              !item.value!.toLowerCase().contains(lowerQuery))
+              .toList();
+
+          matchingItems.sort((a, b) {
+            final aStarts = a.value!.toLowerCase().startsWith(lowerQuery);
+            final bStarts = b.value!.toLowerCase().startsWith(lowerQuery);
+            if (aStarts && !bStarts) return -1;
+            if (!aStarts && bStarts) return 1;
+            return a.value!.compareTo(b.value!);
+          });
+
+          filteredList = [...matchingItems, ...nonMatchingItems];
+          overlayEntry?.markNeedsBuild(); // 🔥 force rebuild of the overlay
+        }
+
+        void showDropdown() {
+          if (isDropdownOpen) return;
+
+          final RenderBox renderBox =
+          containerKey.currentContext!.findRenderObject() as RenderBox;
+          final size = renderBox.size;
+
+          overlayEntry = OverlayEntry(
+            builder: (context) {
+              return Positioned(
+                width: size.width,
+                child: CompositedTransformFollower(
+                  link: layerLink,
+                  offset: Offset(0.0, size.height),
+                  showWhenUnlinked: false,
+                  child: StatefulBuilder(
+                    builder: (context, innerSetState) {
+                      return Material(
+                        elevation: 4.0,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 300),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Search field
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                  controller: searchController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search...',
+                                    prefixIcon: const Icon(Icons.search),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    isDense: true,
+                                  ),
+                                  autofocus: true,
+                                  onChanged: (value) {
+                                    filterItems(value);
+                                    innerSetState(() {}); // 🔥 rebuild dropdown
+                                  },
+                                ),
+                              ),
+                              // List items
+                              Flexible(
+                                child: filteredList.isEmpty
+                                    ? const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text(
+                                    'No items found',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                )
+                                    : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: filteredList.length,
+                                  itemBuilder: (context, index) {
+                                    final item = filteredList[index];
+                                    return InkWell(
+                                      onTap: () {
+                                        onchange(item);
+                                        overlayEntry?.remove();
+                                        isDropdownOpen = false;
+                                        searchController.clear();
+                                        filteredList = List.from(itemList);
+                                        setState(() {});
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: selectedValue?.value ==
+                                              item.value
+                                              ? Colors.blue.shade50
+                                              : null,
+                                        ),
+                                        child: Text(
+                                          item.value!,
+                                          style: TextStyle(
+                                            color:
+                                            selectedValue?.value ==
+                                                item.value
+                                                ? Colors.blue
+                                                : Colors.black,
+                                            fontWeight: selectedValue
+                                                ?.value ==
+                                                item.value
+                                                ? FontWeight.w500
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
+              );
+            },
+          );
+
+          Overlay.of(context).insert(overlayEntry!);
+          isDropdownOpen = true;
+        }
+
+        void hideDropdown() {
+          overlayEntry?.remove();
+          overlayEntry = null;
+          isDropdownOpen = false;
+          searchController.clear();
+          filteredList = List.from(itemList);
+          setState(() {});
+        }
+
+        return CompositedTransformTarget(
+          link: layerLink,
+          child: GestureDetector(
+            onTap: () {
+              if (isDropdownOpen) {
+                hideDropdown();
+              } else {
+                showDropdown();
+              }
+            },
+            child: Container(
+              key: containerKey,
+              height: 46,
+              width: width ?? double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
               ),
-            )
-            .toList(),
-      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedValue?.value ?? hintText ?? 'Select an option',
+                      style: TextStyle(
+                        color: selectedValue != null
+                            ? Colors.black
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    isDropdownOpen
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+
+
+
+
+  Widget buildDropDown(
+      dynamic onchange,
+      CommonDropDownItem? selectedValue,
+      List<CommonDropDownItem> itemList, {
+        double? width,
+      }) {
+
+    return SearchableDropdownButton(
+      onChanged: onchange,
+      selectedValue: selectedValue,
+      itemList: itemList,
+      width: width,
+    );
+  }
+
+
 
   Widget _buildColorDropDown(dynamic onchange,
       CommonDropDownItem? selectedValue, List<CommonDropDownItem> itemList,
@@ -2271,92 +2513,105 @@ class _NewProductState extends State<NewProduct> {
       ),
     );
   }
-
   Widget buildTagsEditTextField(
       String title, String hint, TextEditingController textEditingController,
       {isMandatory = false}) {
-    //textEditingController.buildTextSpan(context: context, withComposing: true);
+
+    // Create a FocusNode for the TextField
+    final FocusNode focusNode = FocusNode();
+
     return buildCommonSingleField(
       title,
-      Container(
-        padding: EdgeInsets.only(top: 14, bottom: 10, left: 14, right: 14),
-        alignment: Alignment.centerLeft,
-        constraints: BoxConstraints(
-          minWidth: DeviceInfo(context).getWidth(),
-          minHeight: 46,
-        ),
-        decoration: MDecoration.decoration1(),
-        child: Wrap(
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          runAlignment: WrapAlignment.start,
-          clipBehavior: Clip.antiAlias,
-          children: List.generate(tags!.length + 1, (index) {
-            if (index == tags!.length) {
-              return TextField(
-                onSubmitted: (string) {
-                  var tag = textEditingController.text
-                      .trim()
-                      .replaceAll(",", "")
-                      .toString();
-                  //print("tag empty ${tag.isEmpty}");
-                  if (tag.isNotEmpty) addTag(tag);
-                },
-                onChanged: (string) {
-                  if (string.trim().contains(",")) {
-                    var tag = string.trim().replaceAll(",", "").toString();
-                    //print("tag empty ${tag.isEmpty}");
-
-                    if (tag.isNotEmpty) addTag(tag);
-                  }
-                },
-                controller: textEditingController,
-                keyboardType: TextInputType.text,
-                maxLines: 1,
-                style: TextStyle(fontSize: 16),
-                decoration: InputDecoration.collapsed(
+      GestureDetector(
+        onTap: () {
+          // Focus the TextField when container is tapped
+          focusNode.requestFocus();
+        },
+        child: Container(
+          padding: EdgeInsets.only(top: 14, bottom: 10, left: 14, right: 14),
+          alignment: Alignment.centerLeft,
+          constraints: BoxConstraints(
+            minWidth: DeviceInfo(context).getWidth(),
+            minHeight: 46,
+          ),
+          decoration: MDecoration.decoration1(),
+          child: Wrap(
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runAlignment: WrapAlignment.start,
+            clipBehavior: Clip.antiAlias,
+            children: List.generate(tags!.length + 1, (index) {
+              if (index == tags!.length) {
+                return Flexible(
+                  child: TextField(
+                    focusNode: focusNode, // Add the focus node
+                    onSubmitted: (string) {
+                      var tag = textEditingController.text
+                          .trim()
+                          .replaceAll(",", "")
+                          .toString();
+                      if (tag.isNotEmpty) addTag(tag);
+                    },
+                    onChanged: (string) {
+                      if (string.trim().contains(",")) {
+                        var tag = string.trim().replaceAll(",", "").toString();
+                        if (tag.isNotEmpty) addTag(tag);
+                      }
+                    },
+                    controller: textEditingController,
+                    keyboardType: TextInputType.text,
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 16),
+                    decoration: InputDecoration.collapsed(
                         hintText: "Type and hit submit",
                         hintStyle: TextStyle(fontSize: 12))
-                    .copyWith(constraints: BoxConstraints(maxWidth: 150)),
-              );
-            }
-            return Container(
-                decoration: BoxDecoration(
-                    color: MyTheme.white,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(width: 2, color: MyTheme.grey_153)),
-                constraints: BoxConstraints(
-                    maxWidth: (DeviceInfo(context).getWidth() - 50) / 4),
-                margin: const EdgeInsets.only(right: 5, bottom: 5),
-                child: Stack(
-                  fit: StackFit.loose,
-                  children: [
-                    Container(
-                        padding: const EdgeInsets.only(
-                            left: 10, right: 20, top: 5, bottom: 5),
-                        constraints: BoxConstraints(
-                            maxWidth:
-                                (DeviceInfo(context).getWidth() - 50) / 4),
-                        child: Text(
-                          tags![index].toString(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        )),
-                    Positioned(
-                      right: 2,
-                      child: InkWell(
-                        onTap: () {
-                          tags!.removeAt(index);
-                          setChange();
-                        },
-                        child: Icon(Icons.highlight_remove,
-                            size: 15, color: MyTheme.red),
+                        .copyWith(
+                      constraints: BoxConstraints(
+                        minWidth: 150, // Change maxWidth to minWidth
+                        maxWidth: double.infinity, // Allow expansion
                       ),
-                    )
-                  ],
-                ));
-          }),
+                    ),
+                  ),
+                );
+              }
+              return Container(
+                  decoration: BoxDecoration(
+                      color: MyTheme.white,
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(width: 2, color: MyTheme.grey_153)),
+                  constraints: BoxConstraints(
+                      maxWidth: (DeviceInfo(context).getWidth() - 50) / 4),
+                  margin: const EdgeInsets.only(right: 5, bottom: 5),
+                  child: Stack(
+                    fit: StackFit.loose,
+                    children: [
+                      Container(
+                          padding: const EdgeInsets.only(
+                              left: 10, right: 20, top: 5, bottom: 5),
+                          constraints: BoxConstraints(
+                              maxWidth:
+                              (DeviceInfo(context).getWidth() - 50) / 4),
+                          child: Text(
+                            tags![index].toString(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          )),
+                      Positioned(
+                        right: 2,
+                        child: InkWell(
+                          onTap: () {
+                            tags!.removeAt(index);
+                            setChange();
+                          },
+                          child: Icon(Icons.highlight_remove,
+                              size: 15, color: MyTheme.red),
+                        ),
+                      )
+                    ],
+                  ));
+            }),
+          ),
         ),
       ),
       isMandatory: isMandatory,
@@ -2370,6 +2625,9 @@ class _NewProductState extends State<NewProduct> {
     tagEditTextController.clear();
     setChange();
   }
+
+
+
 
   Widget buildPriceEditTextField(String title, String hint,
       {isMandatory = false}) {
@@ -2828,5 +3086,165 @@ class MHeight {
 
   set height(double? value) {
     _height = value;
+  }
+}
+
+
+
+
+class SearchableDropdownButton extends StatefulWidget {
+  final Function(CommonDropDownItem?) onChanged;
+  final CommonDropDownItem? selectedValue;
+  final List<CommonDropDownItem> itemList;
+  final double? width;
+
+  const SearchableDropdownButton({
+    Key? key,
+    required this.onChanged,
+    required this.itemList,
+    this.selectedValue,
+    this.width,
+  }) : super(key: key);
+
+  @override
+  State<SearchableDropdownButton> createState() => _SearchableDropdownButtonState();
+}
+
+class _SearchableDropdownButtonState extends State<SearchableDropdownButton> {
+  final TextEditingController _searchController = TextEditingController();
+  List<CommonDropDownItem> _filteredItems = [];
+  bool _isDropdownOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = widget.itemList;
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      if (_searchController.text.isEmpty) {
+        _filteredItems = widget.itemList;
+      } else {
+        _filteredItems = widget.itemList
+            .where((item) => item.value!
+            .toLowerCase()
+            .contains(_searchController.text.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  void _onDropdownTap() {
+    setState(() {
+      _isDropdownOpen = !_isDropdownOpen;
+      if (!_isDropdownOpen) {
+        _searchController.clear();
+        _filteredItems = widget.itemList;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 46,
+      width: widget.width ,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      decoration: MDecoration.decoration1(),
+      child: DropdownButton<CommonDropDownItem>(
+        menuMaxHeight: 350,
+        isDense: true,
+        underline: Container(),
+        isExpanded: true,
+        onTap: _onDropdownTap,
+        onChanged: (CommonDropDownItem? value) {
+          widget.onChanged(value);
+          _searchController.clear();
+          _filteredItems = widget.itemList;
+        },
+        icon: const Icon(Icons.arrow_drop_down),
+        value: widget.selectedValue,
+        selectedItemBuilder: (BuildContext context) {
+          return widget.itemList.map<Widget>((CommonDropDownItem item) {
+            return Text(item.value!);
+          }).toList();
+        },
+        items: [
+          // Search bar item (non-selectable)
+          DropdownMenuItem<CommonDropDownItem>(
+            enabled: false,
+            value: null,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                    icon: const Icon(Icons.clear, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                    },
+                  )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: const BorderSide(color: Colors.blue),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  isDense: true,
+                ),
+                onTap: () {
+                  // Prevent dropdown from closing when tapping search field
+                },
+              ),
+            ),
+          ),
+          // Divider
+          const DropdownMenuItem<CommonDropDownItem>(
+            enabled: false,
+            value: null,
+            child: Divider(height: 1),
+          ),
+          // Filtered items
+          ..._filteredItems.map(
+                (value) => DropdownMenuItem<CommonDropDownItem>(
+              value: value,
+              child: Text(value.value!),
+            ),
+          ),
+          // No results message
+          if (_filteredItems.isEmpty)
+            const DropdownMenuItem<CommonDropDownItem>(
+              enabled: false,
+              value: null,
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'No items found',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

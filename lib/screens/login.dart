@@ -13,8 +13,10 @@ import 'package:active_ecommerce_seller_app/repositories/address_repository.dart
 import 'package:active_ecommerce_seller_app/repositories/auth_repository.dart';
 import 'package:active_ecommerce_seller_app/screens/main.dart';
 import 'package:active_ecommerce_seller_app/screens/password_forget.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:one_context/one_context.dart';
@@ -406,21 +408,72 @@ class _LoginState extends State<Login> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 20,
-              ),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(
-                  LangText(context: context)
-                      .getLocal()!
-                      .in_case_of_any_difficulties_contact_with_admin,
-                  style:
-                      TextStyle(fontSize: 12, color: MyTheme.app_accent_border),
-                ),
+        Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Container(
+            alignment: Alignment.center,
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: TextStyle(fontSize: 12, color: MyTheme.app_accent_border),
+                children: [
+                  const TextSpan(text: 'In case of any difficulties, '),
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final url = Uri.parse('https://wa.me/2347063878793');
+                        if (await canLaunchUrl(url) ) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open the link')),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'contact',
+                        style: TextStyle(
+                          color: Colors.green,
+                          decoration: TextDecoration.underline,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const TextSpan(text: ' the admin.'),
+                  const TextSpan(text: 'No account yet?'),
+
+
+
+                  WidgetSpan(
+                    child: GestureDetector(
+                      onTap: () async {
+                        final url = Uri.parse('https://uvicol.com/shops/create');
+                        if (await canLaunchUrl(url) ) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not open the link')),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Sign up',
+                        style: TextStyle(
+                          color: Colors.green,
+                          decoration: TextDecoration.underline,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+
+
+                ],
               ),
             ),
+          ),
+        ),
             // Padding(
             //   padding: const EdgeInsets.only(
             //     top: 20,

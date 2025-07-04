@@ -23,6 +23,8 @@ import 'package:route_transitions/route_transitions.dart';
 import 'package:toast/toast.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../digital_product/digital_product.dart';
+import '../whole_sale_product/products.dart';
 
 class Products extends StatefulWidget {
   final bool fromBottomBar;
@@ -267,12 +269,83 @@ class _ProductsState extends State<Products> {
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  child: _isProductInit
-                      ? productsContainer()
-                      : ShimmerHelper()
-                          .buildListShimmer(item_count: 20, item_height: 80.0),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16), // Global horizontal padding
+
+                                  child: Text('All Products',style: TextStyle(
+
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: MyTheme.app_accent_color
+                                                  ),
+
+                                                  ),
+                                ),
+                              ],
+                            ),
+ SizedBox(
+   height: 10,
+ ),
+
+
+                // Physical Products
+                _buildProductSection(
+                  context: context,
+                  title: "Physical Products",
+                  color: Colors.blue.shade600,
+                  onTap: () {
+                    // Do something
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DigitalProducts ()),
+                    );
+                  }, mWidht: mWidht,
                 ),
+
+                const SizedBox(height: 20),
+
+                // Digital Products
+                _buildProductSection(
+                  context: context,
+                  title: "Digital Products",
+                  color: Colors.green.shade600,
+                  onTap: () {
+                    MyTransaction(context: context).push(const DigitalProducts());
+
+                  }, mWidht: mWidht,
+                ),
+
+                const SizedBox(height: 20),
+
+                _buildProductSection(
+                  context: context,
+                  title: "Wholesale Products",
+                  color: Colors.orange.shade600,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const  WholeSaleProducts()),
+                    );
+                  }
+
+                  , mWidht: mWidht,
+                ),
+
+
+
+
+                //
+                // Container(
+                //   child: _isProductInit
+                //       ? productsContainer()
+                //       : ShimmerHelper()
+                //           .buildListShimmer(item_count: 20, item_height: 80.0),
+                // ),
+
+
+
               ],
             ),
           ),
@@ -463,12 +536,14 @@ class _ProductsState extends State<Products> {
                 return productItem(
                     index: index,
                     productId: _productList[index].id,
-                    imageUrl: _productList[index].thumbnailImg,
+                    imageUrl: _productList[index].thumbnailImg ?? '',
                     productTitle: _productList[index].name!,
                     category: _productList[index].category,
                     productPrice: _productList[index].price.toString(),
                     quantity: _productList[index].quantity.toString());
               }),
+
+
         ],
       ),
     );
@@ -827,5 +902,57 @@ class _ProductsState extends State<Products> {
           );
   }
 }
+
+
+
+Widget _buildProductSection({
+  required BuildContext context,
+  required String title,
+  required Color color,
+  required VoidCallback onTap,
+  required double mWidht,
+
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(10),
+      topRight: Radius.circular(10),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16), // 👈 horizontal padding
+      child: Container(
+        height: 60,
+        width: mWidht,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+
+
+
+
 
 enum MenuOptions { Edit, Published, Featured, Delete, Duplicate }

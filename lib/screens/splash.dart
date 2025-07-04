@@ -44,10 +44,27 @@ class _SplashState extends State<Splash> {
   }
 
   Future<void> _initPackageInfo() async {
-    final PackageInfo info = await PackageInfo.fromPlatform();
-    setState(() {
-      _packageInfo = info;
-    });
+    try {
+      final PackageInfo info = await PackageInfo.fromPlatform();
+      if (mounted) {
+        setState(() {
+          _packageInfo = info;
+        });
+      }
+    } catch (e) {
+      // Handle error gracefully - use default values
+      print('Error getting package info: $e');
+      if (mounted) {
+        setState(() {
+          _packageInfo = PackageInfo(
+            appName: AppConfig.app_name,
+            packageName: 'com.example.app',
+            version: '1.0.0',
+            buildNumber: '1',
+          );
+        });
+      }
+    }
   }
 
   @override
@@ -59,7 +76,7 @@ class _SplashState extends State<Splash> {
       navigateAfterSeconds: access_token.$!.isNotEmpty ? Home() : Login(),
       //navigateAfterFuture: loadFromFuture(), //uncomment this
       version: Text(
-        "version " + _packageInfo.version,
+        "version ${_packageInfo.version}",
         style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 11.0,
@@ -173,21 +190,29 @@ class _CustomSplashScreenState extends State<CustomSplashScreen> {
   @override
   void initState() {
     super.initState();
-    access_token.load().then((value) {
-      AuthHelper().fetch_and_set().then((value) {
-        if (value.result != null && value.result!) {
-          AIZRoute.pushAndRemoveAll(context, Main(),
-              middleware: MailVerificationRouteMiddleware());
-        } else {
-          AIZRoute.pushAndRemoveAll(context, Login());
-        }
-      });
-    });
+    _initializeApp();
+  }
 
-    // Future.delayed(Duration(seconds: widget.seconds)).then((value) {
-    //   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:(context)=> access_token.$.isNotEmpty?Main():Login()), (route) => false);
-    //
-    // });
+  Future<void> _initializeApp() async {
+    try {
+      await access_token.load();
+      final result = await AuthHelper().fetch_and_set();
+
+      if (!mounted) return;
+
+      if (result.result != null && result.result!) {
+        AIZRoute.pushAndRemoveAll(context, Main(),
+            middleware: MailVerificationRouteMiddleware());
+      } else {
+        AIZRoute.pushAndRemoveAll(context, Login());
+      }
+    } catch (e) {
+      print('Error during app initialization: $e');
+      // Fallback to login screen on error
+      if (mounted) {
+        AIZRoute.pushAndRemoveAll(context, Login());
+      }
+    }
   }
 
   @override

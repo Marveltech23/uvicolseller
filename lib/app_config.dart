@@ -23,7 +23,7 @@ class AppConfig {
   //configure this
   //localhost
   static const bool HTTPS = true;
-  static const DOMAIN_PATH = "domain.com";
+  static const DOMAIN_PATH = "uvicol.com";
 
   //do not configure these below
   static const String API_ENDPATH = "api/v2";

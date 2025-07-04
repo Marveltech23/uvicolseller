@@ -671,7 +671,7 @@ class _AccountState extends State<Account> with TickerProviderStateMixin {
                             GestureDetector(
                               onTap: () => OneContext().push(
                                 MaterialPageRoute(
-                                  builder: (_) => const AuctionProduct(),
+                                    builder: (_) => const AuctionProduct(),
                                 ),
                               ),
                               child: Row(

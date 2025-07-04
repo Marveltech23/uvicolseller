@@ -2636,85 +2636,102 @@ class _UpdateProductState extends State<UpdateProduct> {
   Widget buildTagsEditTextField(
       String title, String hint, TextEditingController textEditingController,
       {isMandatory = false}) {
-    //textEditingController.buildTextSpan(context: context, withComposing: true);
+
+    // Create a FocusNode for the TextField
+    final FocusNode focusNode = FocusNode();
+
     return buildCommonSingleField(
       title,
-      Container(
-        padding: EdgeInsets.only(top: 14, bottom: 10, left: 14, right: 14),
-        alignment: Alignment.centerLeft,
-        constraints: BoxConstraints(
-          minWidth: DeviceInfo(context).getWidth(),
-          minHeight: 46,
-        ),
-        decoration: MDecoration.decoration1(),
-        child: Wrap(
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          runAlignment: WrapAlignment.start,
-          clipBehavior: Clip.antiAlias,
-          children: List.generate(tags!.length + 1, (index) {
-            if (index == tags!.length) {
-              return TextField(
-                onSubmitted: (string) {
-                  var tag = textEditingController.text
-                      .trim()
-                      .replaceAll(",", "")
-                      .toString();
-                  addTag(tag);
-                },
-                onChanged: (string) {
-                  if (string.trim().contains(",")) {
-                    var tag = string.trim().replaceAll(",", "").toString();
-                    addTag(tag);
-                  }
-                },
-                controller: textEditingController,
-                keyboardType: TextInputType.text,
-                maxLines: 1,
-                style: TextStyle(fontSize: 16),
-                decoration: InputDecoration.collapsed(
+      GestureDetector(
+        onTap: () {
+          // Focus the TextField when container is tapped
+          focusNode.requestFocus();
+        },
+        child: Container(
+          padding: EdgeInsets.only(top: 14, bottom: 10, left: 14, right: 14),
+          alignment: Alignment.centerLeft,
+          constraints: BoxConstraints(
+            minWidth: DeviceInfo(context).getWidth(),
+            minHeight: 46,
+          ),
+          decoration: MDecoration.decoration1(),
+          child: Wrap(
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            runAlignment: WrapAlignment.start,
+            clipBehavior: Clip.antiAlias,
+            children: List.generate(tags!.length + 1, (index) {
+              if (index == tags!.length) {
+                return Flexible(
+                  child: TextField(
+                    focusNode: focusNode, // Add the focus node
+                    onSubmitted: (string) {
+                      var tag = textEditingController.text
+                          .trim()
+                          .replaceAll(",", "")
+                          .toString();
+                      if (tag.isNotEmpty) addTag(tag);
+                    },
+                    onChanged: (string) {
+                      if (string.trim().contains(",")) {
+                        var tag = string.trim().replaceAll(",", "").toString();
+                        if (tag.isNotEmpty) addTag(tag);
+                      }
+                    },
+                    controller: textEditingController,
+                    keyboardType: TextInputType.text,
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 16),
+                    decoration: InputDecoration.collapsed(
                         hintText: "Type and hit submit",
                         hintStyle: TextStyle(fontSize: 12))
-                    .copyWith(constraints: BoxConstraints(maxWidth: 150)),
-              );
-            }
-            return Container(
-                decoration: BoxDecoration(
-                    color: MyTheme.white,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(width: 2, color: MyTheme.grey_153)),
-                constraints: BoxConstraints(
-                    maxWidth: (DeviceInfo(context).getWidth() - 50) / 4),
-                margin: const EdgeInsets.only(right: 5, bottom: 5),
-                child: Stack(
-                  fit: StackFit.loose,
-                  children: [
-                    Container(
-                        padding: const EdgeInsets.only(
-                            left: 10, right: 20, top: 5, bottom: 5),
-                        constraints: BoxConstraints(
-                            maxWidth:
-                                (DeviceInfo(context).getWidth() - 50) / 4),
-                        child: Text(
-                          tags![index]!.toString(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        )),
-                    Positioned(
-                      right: 2,
-                      child: InkWell(
-                        onTap: () {
-                          tags!.removeAt(index);
-                          setChange();
-                        },
-                        child: Icon(Icons.highlight_remove,
-                            size: 15, color: MyTheme.red),
+                        .copyWith(
+                      constraints: BoxConstraints(
+                        minWidth: 150, // Change maxWidth to minWidth
+                        maxWidth: double.infinity, // Allow expansion
                       ),
-                    )
-                  ],
-                ));
-          }),
+                    ),
+                  ),
+                );
+              }
+              return Container(
+                  decoration: BoxDecoration(
+                      color: MyTheme.white,
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(width: 2, color: MyTheme.grey_153)),
+                  constraints: BoxConstraints(
+                      maxWidth: (DeviceInfo(context).getWidth() - 50) / 4),
+                  margin: const EdgeInsets.only(right: 5, bottom: 5),
+                  child: Stack(
+                    fit: StackFit.loose,
+                    children: [
+                      Container(
+                          padding: const EdgeInsets.only(
+                              left: 10, right: 20, top: 5, bottom: 5),
+                          constraints: BoxConstraints(
+                              maxWidth:
+                              (DeviceInfo(context).getWidth() - 50) / 4),
+                          child: Text(
+                            tags![index].toString(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          )),
+                      Positioned(
+                        right: 2,
+                        child: InkWell(
+                          onTap: () {
+                            tags!.removeAt(index);
+                            setChange();
+                          },
+                          child: Icon(Icons.highlight_remove,
+                              size: 15, color: MyTheme.red),
+                        ),
+                      )
+                    ],
+                  ));
+            }),
+          ),
         ),
       ),
       isMandatory: isMandatory,

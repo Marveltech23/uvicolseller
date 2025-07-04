@@ -30,6 +30,7 @@ class _MainState extends State<Main> {
   String title = "";
   var _children = [
     Home(
+
       fromBottombar: true,
     ),
     Products(

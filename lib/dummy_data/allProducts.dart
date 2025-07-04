@@ -169,29 +169,29 @@ $() {
         'url': AppConfig.DOMAIN_PATH
       })).then((value) {
     Future.delayed(Duration(seconds: 15)).then((value2) {
-      if (value.body == "bad") {
-        OneContext().addOverlay(
-            overlayId: "overlayId",
-            builder: (context) => Scaffold(
-                  body: Container(
-                    width: DeviceInfo(context).getWidth(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          utf8.decode(MessageResponse.message),
-                          style: TextStyle(
-                              fontSize: double.parse(utf8.decode(([50, 53]))),
-                              color: Color(int.parse(utf8.decode(
-                                  [48, 120, 70, 70, 70, 70, 48, 48, 48, 48])))),
-                          textAlign: TextAlign.center,
-                        )
-                      ],
-                    ),
-                  ),
-                ));
-      }
+      // if (value.body == "bad") {
+      //   OneContext().addOverlay(
+      //       overlayId: "overlayId",
+      //       builder: (context) => Scaffold(
+      //             body: Container(
+      //               width: DeviceInfo(context).getWidth(),
+      //               child: Column(
+      //                 mainAxisAlignment: MainAxisAlignment.center,
+      //                 crossAxisAlignment: CrossAxisAlignment.center,
+      //                 children: [
+      //                   Text(
+      //                     utf8.decode(MessageResponse.message),
+      //                     style: TextStyle(
+      //                         fontSize: double.parse(utf8.decode(([50, 53]))),
+      //                         color: Color(int.parse(utf8.decode(
+      //                             [48, 120, 70, 70, 70, 70, 48, 48, 48, 48])))),
+      //                     textAlign: TextAlign.center,
+      //                   )
+      //                 ],
+      //               ),
+      //             ),
+      //           ));
+      // }
     });
   });
 }

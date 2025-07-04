@@ -6,6 +6,12 @@ class CommonDropDownItem {
   CommonDropDownItem(this.key, this.value);
 }
 
+// class CommonDropDownItem1 {
+//   final String? value;
+//   CommonDropDownItem1({this.value});
+// }
+
+
 class ColorModel {
   String? key, value, name;
 

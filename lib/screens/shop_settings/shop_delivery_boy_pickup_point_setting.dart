@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:active_ecommerce_seller_app/custom/buttons.dart';
 import 'package:active_ecommerce_seller_app/custom/device_info.dart';
 import 'package:active_ecommerce_seller_app/custom/localization.dart';
